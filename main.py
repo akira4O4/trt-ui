@@ -1,19 +1,15 @@
 import os
 import sys
 from PyQt6 import QtWidgets
-
+from loguru import logger
 from utils.utils import get_uuid, get_time
 from utils.jsonconfig import JsonConfig
 from utils.decode_onnx import DecodeONNX
-from call.onnx2engine import CallONNX2Engine
-
+from slot.slot_onnx2engine import SlotONNX2Engine
 
 if __name__ == '__main__':
-    # decode_onnx=DecodeONNX(r'D:\llf\code\export-ui\temp\20240421_201659_danyang_E_mt_bs1_cls4_seg6_static.onnx')
-    # print(decode_onnx.inputs)
-    # print(decode_onnx.outputs)
-    # print(decode_onnx.get_io_info())
-    # exit()
+
+    # Install app version.json
     default_config_dir = os.path.join(os.path.expanduser("~"), r".config/export-ui")
     if not os.path.exists(default_config_dir):
         os.makedirs(default_config_dir)
@@ -24,8 +20,9 @@ if __name__ == '__main__':
         config.add({'install_time': get_time()})
         config.add({'uuid': get_uuid()})
         config.save(default_config_path)
+        logger.success(f'Install config to: {default_config_path}')
 
     app = QtWidgets.QApplication(sys.argv)
-    window = CallONNX2Engine(default_config_path)
+    window = SlotONNX2Engine(default_config_path)
     window.show()
     sys.exit(app.exec())

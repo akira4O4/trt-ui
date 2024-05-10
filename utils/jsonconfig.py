@@ -56,11 +56,11 @@ class JsonConfig:
             del self.data[key]
             return True
 
-    def add(self, kv: dict, overwrite: Optional[bool] = False) -> bool:
+    def add(self, kv: dict, overwrite: Optional[bool] = True):
         for k, v in kv.items():
             self._add(k, v, overwrite)
 
-    def _add(self, key: str, val, overwrite: Optional[bool] = False) -> bool:
+    def _add(self, key: str, val, overwrite: Optional[bool] = True) -> bool:
 
         if self.data.get(key) is None or self.data.get(key) == "":
             self.data[key] = val

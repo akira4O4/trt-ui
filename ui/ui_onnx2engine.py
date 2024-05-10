@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'D:\llf\code\export-ui\ui\onnx2engine.ui'
+# Form implementation generated from reading ui file 'D:\llf\code\export-ui\ui\ui_onnx2engine.ui'
 #
 # Created by: PyQt6 UI code generator 6.4.2
 #
@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_ONNX2Engine(object):
     def setupUi(self, ONNX2Engine):
         ONNX2Engine.setObjectName("ONNX2Engine")
-        ONNX2Engine.resize(717, 394)
+        ONNX2Engine.resize(800, 400)
         self.centralwidget = QtWidgets.QWidget(parent=ONNX2Engine)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -82,22 +82,22 @@ class Ui_ONNX2Engine(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.groupBox_workspace)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.horizontalSlider_workspace = QtWidgets.QSlider(parent=self.groupBox_workspace)
-        self.horizontalSlider_workspace.setMinimum(1024)
-        self.horizontalSlider_workspace.setMaximum(12288)
-        self.horizontalSlider_workspace.setSingleStep(512)
-        self.horizontalSlider_workspace.setProperty("value", 1024)
+        self.horizontalSlider_workspace.setMinimum(1)
+        self.horizontalSlider_workspace.setMaximum(12)
+        self.horizontalSlider_workspace.setSingleStep(1)
+        self.horizontalSlider_workspace.setProperty("value", 2)
         self.horizontalSlider_workspace.setTracking(True)
         self.horizontalSlider_workspace.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.horizontalSlider_workspace.setTickPosition(QtWidgets.QSlider.TickPosition.TicksBelow)
-        self.horizontalSlider_workspace.setTickInterval(1024)
+        self.horizontalSlider_workspace.setTickInterval(1)
         self.horizontalSlider_workspace.setObjectName("horizontalSlider_workspace")
         self.horizontalLayout_2.addWidget(self.horizontalSlider_workspace)
         self.label_workspace_number = QtWidgets.QLabel(parent=self.groupBox_workspace)
         self.label_workspace_number.setObjectName("label_workspace_number")
         self.horizontalLayout_2.addWidget(self.label_workspace_number)
-        self.label_workspace_mb = QtWidgets.QLabel(parent=self.groupBox_workspace)
-        self.label_workspace_mb.setObjectName("label_workspace_mb")
-        self.horizontalLayout_2.addWidget(self.label_workspace_mb)
+        self.label_workspace_gb = QtWidgets.QLabel(parent=self.groupBox_workspace)
+        self.label_workspace_gb.setObjectName("label_workspace_gb")
+        self.horizontalLayout_2.addWidget(self.label_workspace_gb)
         self.verticalLayout_5.addWidget(self.groupBox_workspace)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
@@ -200,7 +200,7 @@ class Ui_ONNX2Engine(object):
         self.horizontalLayout_4.addWidget(self.groupBox)
         ONNX2Engine.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=ONNX2Engine)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 717, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
         self.menubar.setObjectName("menubar")
         self.menu_help = QtWidgets.QMenu(parent=self.menubar)
         self.menu_help.setObjectName("menu_help")
@@ -225,7 +225,7 @@ class Ui_ONNX2Engine(object):
 
     def retranslateUi(self, ONNX2Engine):
         _translate = QtCore.QCoreApplication.translate
-        ONNX2Engine.setWindowTitle(_translate("ONNX2Engine", "ONNX->Engine"))
+        ONNX2Engine.setWindowTitle(_translate("ONNX2Engine", "TRT Export"))
         self.groupBox_config.setTitle(_translate("ONNX2Engine", "Config"))
         self.pushButton_onnx_input.setText(_translate("ONNX2Engine", "Select ONNX"))
         self.lineEdit_output.setPlaceholderText(_translate("ONNX2Engine", "/home/data/model.engine"))
@@ -235,7 +235,7 @@ class Ui_ONNX2Engine(object):
         self.lineEdit_onnx_input.setPlaceholderText(_translate("ONNX2Engine", "/home/data/model.onnx"))
         self.groupBox_workspace.setTitle(_translate("ONNX2Engine", "Workspace"))
         self.label_workspace_number.setText(_translate("ONNX2Engine", "0"))
-        self.label_workspace_mb.setText(_translate("ONNX2Engine", "MB"))
+        self.label_workspace_gb.setText(_translate("ONNX2Engine", "GB"))
         self.groupBox_datatype.setTitle(_translate("ONNX2Engine", "DataType"))
         self.radioButton_fp32.setText(_translate("ONNX2Engine", "FP32"))
         self.radioButton_fp16.setText(_translate("ONNX2Engine", "FP16"))
@@ -256,16 +256,16 @@ class Ui_ONNX2Engine(object):
 "li.unchecked::marker { content: \"\\2610\"; }\n"
 "li.checked::marker { content: \"\\2612\"; }\n"
 "</style></head><body style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Inputs:</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">    name:    image</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">    type:    FP32</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">    shape:    []</p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Output:</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">    name:    output</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">    type:    FP32</p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">    shape:    []</p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">Inputs:</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">    name:    image</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">    type:    FP32</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">    shape:    [N,C,H,W]</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#8d8d8d;\"><br /></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; color:#8d8d8d;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">Output:</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">    name:    output</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">    type:    FP32</span></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt; color:#8d8d8d;\">    shape:    [N,C,H,W]</span></p></body></html>"))
         self.menu_help.setTitle(_translate("ONNX2Engine", "Help"))
         self.action_chinese.setText(_translate("ONNX2Engine", "Chinese"))
         self.action_english.setText(_translate("ONNX2Engine", "English"))
