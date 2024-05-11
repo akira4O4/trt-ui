@@ -4,7 +4,7 @@ from typing import Optional
 from loguru import logger
 
 
-class JsonConfig:
+class JsonFile:
     def __init__(self, path: Optional[str] = None) -> None:
         self._path = path
         self._data = {}
@@ -64,7 +64,7 @@ class JsonConfig:
 
         if self.data.get(key) is None or self.data.get(key) == "":
             self.data[key] = val
-            logger.success(f'Set {key}:{val}')
+            logger.success(f'Set {key} : {val}')
             return True
         else:
             if overwrite:
@@ -86,7 +86,7 @@ class JsonConfig:
         with open(save_path, 'w') as f:
             f.write(json.dumps(self.data, indent=4, ensure_ascii=False))
 
-        logger.info(f'Save file in: {save_path}.')
+        logger.info(f'Save Json File in: {save_path}.')
 
     def keys(self):
         return self.data.keys()

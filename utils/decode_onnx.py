@@ -71,7 +71,7 @@ class DecodeONNX:
 
     def _decode_input(self) -> None:
         inputs = self.onnx_session.get_inputs()
-
+        self._inputs = []
         for item in inputs:
             self._inputs.append(
                 ONNXIO(
@@ -85,6 +85,7 @@ class DecodeONNX:
 
     def _decode_output(self) -> None:
         outputs = self.onnx_session.get_outputs()
+        self._outputs = []
         for item in outputs:
             self._outputs.append(
                 ONNXIO(
