@@ -249,33 +249,33 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         QMessageBox.information(self, 'Success', 'Export Model Config Success.')
 
     # @pyqtSlot()
-    def on_pushButton_run_clicked(self):
-        ui_convert = SlotConvert()
-        ui_convert.show()
+    # def on_pushButton_run_clicked(self):
+        # ui_convert = SlotConvert()
+        # ui_convert.show()
 
-        if self.radioButton_fp32.isChecked():
-            self.use_fp32 = True
-            self.use_fp16 = False
-        if self.radioButton_fp16.isChecked():
-            self.use_fp32 = False
-            self.use_fp16 = True
-
-        if not self.is_analysis:
-            QMessageBox.warning(self, "Warning", "Please Use Analysis Function.")
-        else:
+        # if self.radioButton_fp32.isChecked():
+        #     self.use_fp32 = True
+        #     self.use_fp16 = False
+        # if self.radioButton_fp16.isChecked():
+        #     self.use_fp32 = False
+        #     self.use_fp16 = True
+        #
+        # if not self.is_analysis:
+        #     QMessageBox.warning(self, "Warning", "Please Use Analysis Function.")
+        # else:
 
             # ui_convert = SlotConvert()
             # ui_convert.show()
 
-            static_shape = None
-            dynamic_min_shape = None
-            dynamic_max_shape = None
+            # static_shape = None
+            # dynamic_min_shape = None
+            # dynamic_max_shape = None
 
-            if self.decode_onnx.is_dynamic:
-                static_shape = self.str2list(self.lineEdit_min_shape)
-            else:
-                dynamic_min_shape = self.str2list(self.lineEdit_min_shape)
-                dynamic_max_shape = self.str2list(self.lineEdit_max_shape)
+            # if self.decode_onnx.is_dynamic:
+            #     static_shape = self.str2list(self.lineEdit_min_shape)
+            # else:
+            #     dynamic_min_shape = self.str2list(self.lineEdit_min_shape)
+            #     dynamic_max_shape = self.str2list(self.lineEdit_max_shape)
 
             # onnx2engine = ONNX2Engine(
             #     self.onnx_model_path,
