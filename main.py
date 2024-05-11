@@ -1,6 +1,6 @@
 import os
 import sys
-from PyQt6 import QtWidgets
+from PyQt5 import QtWidgets
 from loguru import logger
 from utils.utils import get_uuid, get_time
 from utils.jsonconfig import JsonConfig

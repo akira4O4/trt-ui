@@ -2,10 +2,10 @@ import os
 
 from loguru import logger
 
-from PyQt6.QtCore import QUrl
-from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtWidgets import QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
 from utils.utils import get_time
 from utils.jsonconfig import JsonConfig
@@ -248,7 +248,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         export_config.save(filepath)
         QMessageBox.information(self, 'Success', 'Export Model Config Success.')
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def on_pushButton_run_clicked(self):
         ui_convert = SlotConvert()
         ui_convert.show()

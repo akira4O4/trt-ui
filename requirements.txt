@@ -1,5 +1,5 @@
 loguru~=0.7.2
-pyqt6~=6.4.2
 uuid~=1.30
 onnx~=1.16.0
 onnxruntime~=1.17.3
+pyqt5~=5.15.9
