@@ -91,6 +91,7 @@ class Ui_ONNX2Engine(object):
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.groupBox_workspace)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         self.horizontalSlider_workspace = QtWidgets.QSlider(self.groupBox_workspace)
+        self.horizontalSlider_workspace.setEnabled(False)
         self.horizontalSlider_workspace.setMinimum(1)
         self.horizontalSlider_workspace.setMaximum(12)
         self.horizontalSlider_workspace.setSingleStep(1)

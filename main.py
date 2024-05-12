@@ -20,8 +20,12 @@ if __name__ == '__main__':
             os.makedirs(install_config_dir)
 
         if not os.path.exists(install_config_path):
-            config.add({'install_time': get_time()})
-            config.add({'uuid': get_uuid()})
+            config.add(
+                {
+                    'install_time': get_time(),
+                    'uuid': get_uuid()
+                }
+            )
             config.save(install_config_path)
             logger.success(f'Install config to: {install_config_path}')
 

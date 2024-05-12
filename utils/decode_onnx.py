@@ -12,6 +12,9 @@ class ONNXIO:  # noqa
     type: str = ''
     shape: list = ''
 
+    def __repr__(self):
+        return f'Name: {self.name}\nType: {self.type}\nShape: {self.shape}'
+
 
 class DecodeONNX:
     def __init__(self, onnx_path: Optional[str] = None):
@@ -43,6 +46,9 @@ class DecodeONNX:
         self._output = self._graph.output
         self.num_of_input = len(self._input)
         self.num_of_output = len(self._output)
+
+        logger.info(f'Decode ONNX: {self._onnx_path}')
+        self.decode_io()
 
     def set_onnx_path(self, path: str):
         self._onnx_path = path
@@ -82,6 +88,7 @@ class DecodeONNX:
             )
             if item.shape[0] is None:
                 self._is_dynamic = True
+        logger.info(f'Decode Input')
 
     def _decode_output(self) -> None:
         outputs = self.onnx_session.get_outputs()
@@ -94,6 +101,7 @@ class DecodeONNX:
                     item.shape
                 )
             )
+        logger.info(f'Decode Output')
 
     def get_io_info(self) -> str:
         return self._get_inputs_info() + self._get_output_info()

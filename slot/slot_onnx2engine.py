@@ -13,25 +13,22 @@ from utils.decode_onnx import DecodeONNX
 from utils.colors import Colors
 # from utils.onnx2engine import ONNX2Engine
 from ui.ui_onnx2engine import Ui_ONNX2Engine
+from utils.filepath import FilePath
 from slot.slot_convert import SlotConvert
 
 
 class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
     def __init__(self, config_path: str) -> None:
+
         super().__init__()
         self.config = JsonFile(config_path)
         self.export_log = JsonFile('configs/export.log.json')
-        self.export_log_path = ''
         self.colors = Colors
-        # Input ONNX path
-        self.onnx_model_path = ''
-        self.onnx_model_dir = ''
-        self.onnx_model_name = ''
 
-        # Output Engine Path info
-        self.engine_model_name = ''
-        self.engine_model_dir = ''
-        self.engine_model_path = ''
+        # Input ONNX path
+        self.onnx_fp = FilePath()
+        self.engine_fp = FilePath()
+        self.export_log_fp = FilePath()
 
         # Import And Export Config Path
         self.import_config_path = ''
@@ -59,9 +56,6 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.disable_export_setting_widgets()
         self.disable_start_widgets()
 
-        self.radioButton_fp32.setEnabled(False)
-        self.radioButton_fp16.setEnabled(False)
-
         self.MIN_WORKSPACE = 1  # GB
         self.MAX_WORKSPACE = self.MIN_WORKSPACE * 12  # GB
 
@@ -69,22 +63,19 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.label_workspace_number.setText(str(self.curr_workspace))
         self.horizontalSlider_workspace.setValue(self.curr_workspace)
 
-        self.model_type = 'static'
-        self.lineEdit_model_type.setEnabled(False)
-        self.lineEdit_min_shape.setEnabled(False)
-        self.lineEdit_max_shape.setEnabled(False)
-
         self.decode_onnx = DecodeONNX()
 
         # Widget connect slot function
-        self.horizontalSlider_workspace.valueChanged.connect(self.slider_workspace)
         self.lineEdit_output.editingFinished.connect(self.lineEdit_output_editingFinished)
-        self.radioButton_fp32.toggled.connect(self.on_radioButton_fp32_toggled)
+        self.horizontalSlider_workspace.valueChanged.connect(self.slider_workspace_valueChanged)
+
+        self.radioButton_fp32.toggled.connect(self.on_radioButton_fp32_16_toggled)
+        self.radioButton_fp16.toggled.connect(self.on_radioButton_fp32_16_toggled)
+
+        self.lineEdit_max_shape.editingFinished.connect(self.lineEdit_min_shape_editingFinished)
+        self.lineEdit_min_shape.editingFinished.connect(self.lineEdit_max_shape_editingFinished)
 
     def disable_config_widgets(self) -> None:
-        self.lineEdit_output.setReadOnly(True)
-        self.lineEdit_input_config.setReadOnly(True)
-        self.lineEdit_input_config.setReadOnly(True)
 
         self.lineEdit_onnx_input.setEnabled(False)
         self.lineEdit_output.setEnabled(False)
@@ -92,6 +83,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.pushButton_output.setEnabled(False)
         self.pushButton_input_config.setEnabled(False)
+        self.horizontalSlider_workspace.setEnabled(False)
 
     def disable_datatype_widget(self) -> None:
         # Datatype btns
@@ -105,10 +97,6 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.radioButton_fp16.setEnabled(False)
 
     def disable_export_setting_widgets(self) -> None:
-        self.lineEdit_model_type.setReadOnly(True)
-        self.lineEdit_min_shape.setReadOnly(True)
-        self.lineEdit_max_shape.setReadOnly(True)
-
         self.lineEdit_model_type.setEnabled(False)
         self.lineEdit_min_shape.setEnabled(False)
         self.lineEdit_max_shape.setEnabled(False)
@@ -117,25 +105,6 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.pushButton_analysis_onnx.setEnabled(False)
         self.pushButton_export_config.setEnabled(False)
         self.pushButton_run.setEnabled(False)
-
-    @staticmethod
-    def split_path(path: str) -> dict:
-
-        file_dir = ''
-        basename = ''
-
-        if os.path.isdir(path):
-            file_dir, basename = os.path.split(path)
-        else:
-            basename = path
-
-        name, suffix = os.path.splitext(basename)
-        return {
-            'file_dir': file_dir,
-            'basename': basename,
-            'name': name,
-            'suffix': suffix
-        }
 
     @staticmethod
     def str2list(data: str) -> list:
@@ -161,18 +130,28 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         if file_path == '':
             return
 
-        self.onnx_model_path = file_path
-        self.onnx_model_dir, self.onnx_model_name = os.path.split(file_path)
+        self.onnx_fp.path = file_path
+        self.onnx_fp.decode()
 
-        self.engine_model_name = self.onnx_model_name.replace('onnx', 'engine')
-        self.engine_model_dir = self.onnx_model_dir
-        self.engine_model_path = os.path.join(self.engine_model_dir, self.engine_model_name)
+        self.engine_fp.path = os.path.join(
+            self.onnx_fp.dir,
+            self.onnx_fp.basename.replace(self.onnx_fp.suffix, '.engine')
+        )
+        self.engine_fp.decode()
 
-        self.export_log_path = os.path.join(self.onnx_model_dir, self.onnx_model_name.replace('onnx', 'log.json'))
-        logger.info(f'Export Log Path: {self.export_log_path}')
+        self.export_log_fp.path = os.path.join(
+            self.engine_fp.dir,
+            self.engine_fp.basename.replace(self.engine_fp.suffix, '.log.json')
+        )
+        self.export_log_fp.decode()
+
+        logger.info(f'ONNX FilePath: \n{self.onnx_fp}')
+        logger.info(f'Engine FilePath: \n{self.engine_fp}')
+        logger.info(f'Export Log FilePath: \n{self.export_log_fp}')
+
         # Config widgets
-        self.lineEdit_onnx_input.setText(self.onnx_model_path)
-        self.lineEdit_output.setText(self.engine_model_path)
+        self.lineEdit_onnx_input.setText(self.onnx_fp.path)
+        self.lineEdit_output.setText(self.engine_fp.path)
 
         self.pushButton_output.setEnabled(True)
         self.pushButton_input_config.setEnabled(True)
@@ -197,13 +176,6 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.pushButton_analysis_onnx.setEnabled(True)
 
-        logger.info(f'Select ONNX Path: {self.onnx_model_path}')
-        logger.info(f'Select ONNX Dir: {self.onnx_model_dir}')
-        logger.info(f'Select ONNX Name: {self.onnx_model_name}')
-        logger.info(f'Create Engine Path: {self.engine_model_path}')
-        logger.info(f'Create Engine Dir: {self.engine_model_dir}')
-        logger.info(f'Create Engine Name: {self.engine_model_name}')
-
     @pyqtSlot()
     def on_pushButton_output_clicked(self) -> None:
 
@@ -211,25 +183,45 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         if select_dir == '':
             return
 
-        self.engine_model_dir = select_dir
-        self.engine_model_path = os.path.join(self.engine_model_dir, self.onnx_model_name.replace('onnx', 'engine'))
+        self.engine_fp.path = os.path.join(
+            select_dir,
+            self.onnx_fp.basename.replace(self.onnx_fp.suffix, '.engine')
+        )
+        self.engine_fp.decode()
 
-        self.lineEdit_output.setText(self.engine_model_path)
-        logger.info(f'Engine Output Path: {self.engine_model_path}')
-        logger.info(f'Engine Output Dir: {self.engine_model_dir}')
-        logger.info(f'Engine Output Name: {self.engine_model_name}')
+        self.export_log_fp.path = os.path.join(
+            self.engine_fp.dir,
+            self.engine_fp.basename.replace(self.engine_fp.suffix, '.log.json')
+        )
+        self.export_log_fp.decode()
+
+        self.lineEdit_output.setText(self.engine_fp.path)
+
+        logger.info(f'Engine FilePath: \n{self.engine_fp}')
+        logger.info(f'Export Log FilePath: \n{self.export_log_fp}')
 
     def lineEdit_output_editingFinished(self) -> None:
+
         if os.path.isdir(self.lineEdit_output.text()):
-            self.engine_model_dir = self.lineEdit_output.text()
-            self.engine_model_path = os.path.join(self.engine_model_dir, self.engine_model_name)
+
+            self.engine_fp.path = os.path.join(
+                self.lineEdit_output.text(),
+                self.engine_fp.basename
+            )
 
         else:
-            self.engine_model_path = self.lineEdit_output.text()
-            self.engine_model_dir, self.engine_model_name = os.path.split(self.engine_model_path)
-            logger.info(f'Engine Output Path: {self.engine_model_path}')
-            logger.info(f'Engine Output Dir: {self.engine_model_dir}')
-            logger.info(f'Engine Output Name: {self.engine_model_name}')
+            self.engine_fp.path = self.lineEdit_output.text()
+
+        self.engine_fp.decode()
+
+        self.export_log_fp.path = os.path.join(
+            self.engine_fp.dir,
+            self.engine_fp.basename.replace(self.engine_fp.suffix, '.log.json')
+        )
+        self.export_log_fp.decode()
+
+        logger.info(f'Engine FilePath: \n{self.engine_fp}')
+        logger.info(f'Export Log FilePath: \n{self.export_log_fp}')
 
     # TODO
     @pyqtSlot()
@@ -263,13 +255,13 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
     @pyqtSlot()
     def on_pushButton_analysis_onnx_clicked(self):
-        if not os.path.exists(self.onnx_model_path):
+        if not os.path.exists(self.onnx_fp.path):
             QMessageBox.warning(self, 'Warning', 'Select Your ONNX Model.')
             return
 
-        self.decode_onnx.set_onnx_path(self.onnx_model_path)
+        self.decode_onnx.set_onnx_path(self.onnx_fp.path)
         self.decode_onnx.init()
-        self.decode_onnx.decode_io()
+        # self.decode_onnx.decode_io()
 
         # Set lineedit text color
         palette = self.lineEdit_model_type.palette()
@@ -285,10 +277,17 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
             self.lineEdit_model_type.setText('Dynamic')
 
+            self.lineEdit_min_shape.setEnabled(True)
+            self.lineEdit_max_shape.setEnabled(True)
+
             self.lineEdit_min_shape.setReadOnly(False)
             self.lineEdit_max_shape.setReadOnly(False)
+
         else:
             self.lineEdit_model_type.setText('Static')
+
+            self.lineEdit_min_shape.setEnabled(False)
+            self.lineEdit_max_shape.setEnabled(False)
 
             self.lineEdit_min_shape.setReadOnly(True)
             self.lineEdit_max_shape.setReadOnly(True)
@@ -300,6 +299,8 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.radioButton_fp16.setEnabled(True)
         self.radioButton_fp32.setChecked(True)
         self.radioButton_fp16.setChecked(False)
+
+        self.horizontalSlider_workspace.setEnabled(True)
 
         palette = self.textEdit_onnx_info.palette()
         palette.setColor(QPalette.Text, QColor(*self.colors.PeacockBlue))
@@ -343,8 +344,8 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
     def on_pushButton_run_clicked(self):
         logger.info('Click Run Button.')
         self.export_log.add({
-            "input_onnx_path": self.onnx_model_path,
-            "output_engine_path": self.engine_model_path,
+            "input_onnx_path": self.onnx_fp.path,
+            "output_engine_path": self.engine_fp.path,
             "workspace": self.curr_workspace,
             "fp32": self.radioButton_fp32.isChecked(),
             "fp16": self.radioButton_fp16.isChecked(),
@@ -355,7 +356,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
             "uuid": self.config('uuid')
         })
 
-        self.export_log.save(self.export_log_path)
+        self.export_log.save(self.export_log_fp.path)
         # ui_convert = SlotConvert()
         # ui_convert.show()
 
@@ -402,25 +403,26 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
     @pyqtSlot()
     def on_action_gitee_triggered(self):
-        QDesktopServices.openUrl(QUrl(self.config('github')))
+        QDesktopServices.openUrl(QUrl(self.config('gitee')))
 
     @pyqtSlot()
     def on_action_github_triggered(self):
-        QDesktopServices.openUrl(QUrl(self.config('gitee')))
+        QDesktopServices.openUrl(QUrl(self.config('github')))
 
-    def slider_workspace(self):
+    def slider_workspace_valueChanged(self):
         self.curr_workspace = self.horizontalSlider_workspace.value()
         self.label_workspace_number.setText(str(self.horizontalSlider_workspace.value()))
-        logger.info(f'Current Workspace val: {self.curr_workspace}')
+        logger.info(f'Current Workspace val: {self.curr_workspace} GB.')
 
-    def on_radioButton_fp32_toggled(self):
-        if self.radioButton_fp32.isChecked():
-            self.use_fp32 = True
-            self.use_fp16 = False
-
-        elif self.radioButton_fp16.isChecked():
-            self.use_fp32 = False
-            self.use_fp16 = True
+    def on_radioButton_fp32_16_toggled(self):
+        self.use_fp32 = self.radioButton_fp32.isChecked()
+        self.use_fp16 = self.radioButton_fp16.isChecked()
 
         logger.info(f'RadioButton FP32: {self.radioButton_fp32.isChecked()}')
         logger.info(f'RadioButton FP16: {self.radioButton_fp16.isChecked()}')
+
+    def lineEdit_min_shape_editingFinished(self) -> None:
+        logger.info(f'Min Shape: {self.lineEdit_min_shape.text()}')
+
+    def lineEdit_max_shape_editingFinished(self) -> None:
+        logger.info(f'Max Shape: {self.lineEdit_max_shape.text()}')
