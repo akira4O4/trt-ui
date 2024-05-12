@@ -1,0 +1,12 @@
+{
+  "input_onnx_path": "",
+  "output_engine_path": "",
+  "workspace": 0,
+  "fp32": true,
+  "fp16": false,
+  "model_type": "",
+  "input_min_shape": [],
+  "input_max_shape": [],
+  "export_time": "",
+  "uuid": ""
+}
