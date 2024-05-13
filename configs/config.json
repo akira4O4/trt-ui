@@ -1,9 +1,11 @@
 {
-  "version": "1.0.0-EA",
+  "version": "1.0.0",
+  "author": "Lee Linfeng.404",
   "e_mail": "akira.404@outlook.com",
   "app_name": "trt-export",
   "uuid": "",
   "install_time": "",
+  "license": "GPLv3",
   "github": "https://github.com/Akira-404/export-ui",
   "gitee": "https://gitee.com/akira404/export-ui"
 }

@@ -2,6 +2,7 @@ import os
 import json
 from typing import Optional
 from loguru import logger
+from utils.filepath import FilePath
 
 
 class JsonFile:
@@ -9,7 +10,7 @@ class JsonFile:
         self._path = path
         self._data = {}
         if path is not None:
-            self._load_json()
+            self.load()
 
     @property
     def data(self) -> dict:
@@ -27,7 +28,7 @@ class JsonFile:
     def path(self, value):
         self._path = value
 
-    def _load_json(self):
+    def load(self):
         base_name = os.path.basename(self.path)
         _, ext = os.path.splitext(base_name)
         if ext != '.json':
@@ -36,16 +37,7 @@ class JsonFile:
 
         with open(self.path, 'r') as config_file:
             self.data = json.load(config_file)
-
-    def reload(self, path: str) -> bool:
-        if not os.path.exists(path):
-            logger.error(f'Re-load json file: {path} is not found.')
-            return False
-
-        self._path = path
-        self._load_json()
-
-        return True
+        logger.info(f'Loading: {self.path}.')
 
     def del_(self, key: str) -> bool:
         if self.data.get(key) is None:

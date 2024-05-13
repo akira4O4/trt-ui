@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QDesktopServices, QColor, QPalette
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
-from utils.utils import get_time
+from utils.utils import get_time,str2list,list2str
 from utils.jsonfile import JsonFile
 from utils.decode_onnx import DecodeONNX
 from utils.colors import Colors
@@ -50,7 +50,6 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.setupUi(self)
 
         # Init Widget Args
-
         self.disable_config_widgets()
         self.disable_datatype_widget()
         self.disable_export_setting_widgets()
@@ -105,24 +104,6 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.pushButton_analysis_onnx.setEnabled(False)
         self.pushButton_export_config.setEnabled(False)
         self.pushButton_run.setEnabled(False)
-
-    @staticmethod
-    def str2list(data: str) -> list:
-        if not data:
-            return []
-        try:
-            _data = data.split(',')
-            _data = [int(x) for x in _data]
-            return _data
-        except:
-            logger.error('Input Data Error.')
-            return []
-
-    @staticmethod
-    def list2str(data: list) -> str:
-        if len(data) == 0:
-            return ''
-        return ','.join(map(str, data))
 
     @pyqtSlot()
     def on_pushButton_onnx_input_clicked(self) -> None:
@@ -245,11 +226,11 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.lineEdit_model_type.setText(self.import_config_data('model_type'))
         if self.import_config_data('model_type').lower() == 'static':
-            self.lineEdit_min_shape.setText(self.list2str(self.import_config_data('input_min_shape')))
-            self.lineEdit_max_shape.setText(self.list2str(self.import_config_data('input_min_shape')))
+            self.lineEdit_min_shape.setText(list2str(self.import_config_data('input_min_shape')))
+            self.lineEdit_max_shape.setText(list2str(self.import_config_data('input_min_shape')))
         else:
-            self.lineEdit_min_shape.setText(self.list2str(self.import_config_data('input_min_shape')))
-            self.lineEdit_max_shape.setText(self.list2str(self.import_config_data('input_max_shape')))
+            self.lineEdit_min_shape.setText(list2str(self.import_config_data('input_min_shape')))
+            self.lineEdit_max_shape.setText(list2str(self.import_config_data('input_max_shape')))
 
         logger.info(f'Select Model Config: {self.import_config_path}')
 
@@ -271,7 +252,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.lineEdit_max_shape.setPalette(palette)
 
         onnx_input = self.decode_onnx.inputs[0]
-        onnx_input_shape = self.list2str(onnx_input.shape)
+        onnx_input_shape = list2str(onnx_input.shape)
 
         if self.decode_onnx.is_dynamic:
 
@@ -332,8 +313,8 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
             "fp32": self.radioButton_fp32.isChecked(),
             "fp16": self.radioButton_fp16.isChecked(),
             "model_type": self.lineEdit_model_type.text(),
-            "input_min_shape": self.str2list(self.lineEdit_min_shape.text()),
-            "input_max_shape": self.str2list(self.lineEdit_max_shape.text()),
+            "input_min_shape": str2list(self.lineEdit_min_shape.text()),
+            "input_max_shape": str2list(self.lineEdit_max_shape.text()),
             "export_time": get_time(),
             "uuid": self.config('uuid')
         })
@@ -350,8 +331,8 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
             "fp32": self.radioButton_fp32.isChecked(),
             "fp16": self.radioButton_fp16.isChecked(),
             "model_type": self.lineEdit_model_type.text(),
-            "input_min_shape": self.str2list(self.lineEdit_min_shape.text()),
-            "input_max_shape": self.str2list(self.lineEdit_max_shape.text()),
+            "input_min_shape": str2list(self.lineEdit_min_shape.text()),
+            "input_max_shape": str2list(self.lineEdit_max_shape.text()),
             "export_time": get_time(),
             "uuid": self.config('uuid')
         })

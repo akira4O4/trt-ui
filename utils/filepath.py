@@ -1,5 +1,6 @@
 import os
 from typing import Optional
+from loguru import logger
 
 
 class FilePath:
@@ -22,6 +23,7 @@ class FilePath:
             self._name, self._suffix = os.path.splitext(self._basename)
 
         self._is_exists = os.path.exists(self._path)
+        logger.info(f'Decode Path: {self.path}')
 
     @property
     def is_exists(self) -> bool:
