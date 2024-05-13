@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QDesktopServices, QColor, QPalette
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
-from utils.utils import get_time,str2list,list2str
+from utils.utils import get_time, str2list, list2str
 from utils.jsonfile import JsonFile
 from utils.decode_onnx import DecodeONNX
 from utils.colors import Colors
@@ -78,10 +78,10 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.lineEdit_onnx_input.setEnabled(False)
         self.lineEdit_output.setEnabled(False)
-        self.lineEdit_input_config.setEnabled(False)
+        # self.lineEdit_input_config.setEnabled(False)
 
         self.pushButton_output.setEnabled(False)
-        self.pushButton_input_config.setEnabled(False)
+        # self.pushButton_input_config.setEnabled(False)
         self.horizontalSlider_workspace.setEnabled(False)
 
     def disable_datatype_widget(self) -> None:
@@ -102,7 +102,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
     def disable_start_widgets(self) -> None:
         self.pushButton_analysis_onnx.setEnabled(False)
-        self.pushButton_export_config.setEnabled(False)
+        # self.pushButton_export_config.setEnabled(False)
         self.pushButton_run.setEnabled(False)
 
     @pyqtSlot()
@@ -135,15 +135,15 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.lineEdit_output.setText(self.engine_fp.path)
 
         self.pushButton_output.setEnabled(True)
-        self.pushButton_input_config.setEnabled(True)
+        # self.pushButton_input_config.setEnabled(True)
 
         self.lineEdit_onnx_input.setReadOnly(True)
         self.lineEdit_output.setReadOnly(False)
-        self.lineEdit_input_config.setReadOnly(True)
+        # self.lineEdit_input_config.setReadOnly(True)
 
         self.lineEdit_onnx_input.setEnabled(True)
         self.lineEdit_output.setEnabled(True)
-        self.lineEdit_input_config.setEnabled(True)
+        # self.lineEdit_input_config.setEnabled(True)
 
         self.disable_datatype_widget()
         self.disable_export_setting_widgets()
@@ -213,7 +213,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.import_config_data = JsonFile(self.import_config_path)
 
-        self.lineEdit_input_config.setText(self.import_config_path)
+        # self.lineEdit_input_config.setText(self.import_config_path)
         self.horizontalSlider_workspace.setValue(self.import_config_data('workspace'))
         self.label_workspace_number.setText(str(self.import_config_data('workspace')))
 
@@ -294,7 +294,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.lineEdit_min_shape.setEnabled(True)
         self.lineEdit_max_shape.setEnabled(True)
 
-        self.pushButton_export_config.setEnabled(True)
+        # self.pushButton_export_config.setEnabled(True)
         self.pushButton_run.setEnabled(True)
 
         self.is_analysis = True
