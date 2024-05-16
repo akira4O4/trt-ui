@@ -124,7 +124,7 @@ class DecodeONNX:
 
 
 if __name__ == '__main__':
-    decode_onnx = DecodeONNX(r'D:\llf\code\export-ui\temp\20240421_201659_danyang_E_mt_bs1_cls4_seg6_static.onnx')
+    decode_onnx = DecodeONNX(r'/temp/20240421_201659_danyang_E_mt_bs1_cls4_seg6_static.onnx')
     print(decode_onnx.inputs)
     print(decode_onnx.outputs)
     print(decode_onnx.get_io_info())

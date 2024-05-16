@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-from ui.ui_convert import Ui_Convert
+from ui_design.py.ui_convert import Ui_Convert
 
 
 class SlotConvert(QMainWindow, Ui_Convert):

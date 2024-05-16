@@ -2,9 +2,9 @@ import os
 import sys
 from PyQt5 import QtWidgets
 from loguru import logger
-from utils.utils import get_uuid, get_time, str2list
-from utils.jsonfile import JsonFile
-from utils.filepath import FilePath
+from src.utils import get_uuid, get_time
+from src.jsonfile import JsonFile
+from src.filepath import FilePath
 from slot.slot_onnx2engine import SlotONNX2Engine
 
 

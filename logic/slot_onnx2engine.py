@@ -7,28 +7,53 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QDesktopServices, QColor, QPalette
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
 
-from utils.utils import get_time, str2list, list2str
-from utils.jsonfile import JsonFile
-from utils.decode_onnx import DecodeONNX
-from utils.colors import Colors
+from src.utils import list2str
 # from utils.onnx2engine import ONNX2Engine
-from ui.ui_onnx2engine import Ui_ONNX2Engine
-from utils.filepath import FilePath
-from slot.slot_convert import SlotConvert
+from src.jsonfile import JsonFile
+from src.decode_onnx import DecodeONNX
+from src.colors import Colors
+from src.filepath import FilePath
+
+from ui_design.py.ui_onnx2engine import Ui_ONNX2Engine
+from PyQt5.QtCore import QThread, pyqtSignal
+
+from logic.slot_convert import SlotConvert
+
+
+class ONNX2EngineThread(QThread):
+    args_signal = pyqtSignal(dict)
+
+    def __init__(self):
+        super(ONNX2EngineThread, self).__init__()
+        self.args_signal.connect(self.recv_args)
+        self.args = {}
+
+    def run(self):
+        logger.info(f'Run RunThread')
+        print(self.args)
+
+    def recv_args(self, args: dict) -> None:
+        logger.info('Recv Args.')
+        self.args = args
 
 
 class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
+
     def __init__(self, config_path: str) -> None:
 
         super().__init__()
         self.config = JsonFile(config_path)
-        self.export_log = JsonFile('configs/export.log.json')
+        # self.export_log = JsonFile('configs/export.log.json')
         self.colors = Colors
+
+        self.onnx2engine_thread = ONNX2EngineThread()
 
         # Input ONNX path
         self.onnx_fp = FilePath()
         self.engine_fp = FilePath()
         self.export_log_fp = FilePath()
+
+        self.export_log = JsonFile()
 
         # Import And Export Config Path
         self.import_config_path = ''
@@ -103,7 +128,7 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
     def disable_start_widgets(self) -> None:
         self.pushButton_analysis_onnx.setEnabled(False)
         # self.pushButton_export_config.setEnabled(False)
-        self.pushButton_run.setEnabled(False)
+        self.pushButton_run.setEnabled(True)
 
     @pyqtSlot()
     def on_pushButton_onnx_input_clicked(self) -> None:
@@ -204,35 +229,34 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         logger.info(f'Engine FilePath: \n{self.engine_fp}')
         logger.info(f'Export Log FilePath: \n{self.export_log_fp}')
 
-    # TODO
-    @pyqtSlot()
-    def on_pushButton_input_config_clicked(self) -> None:
-        self.import_config_path, _ = QFileDialog.getOpenFileName(self, "选择文件", "/", 'json(*.json)')
-        if self.import_config_path == '':
-            return
-
-        self.import_config_data = JsonFile(self.import_config_path)
-
-        # self.lineEdit_input_config.setText(self.import_config_path)
-        self.horizontalSlider_workspace.setValue(self.import_config_data('workspace'))
-        self.label_workspace_number.setText(str(self.import_config_data('workspace')))
-
-        if self.import_config_data('fp32'):
-            self.radioButton_fp32.setChecked(True)
-            self.radioButton_fp16.setChecked(False)
-        else:
-            self.radioButton_fp32.setChecked(False)
-            self.radioButton_fp16.setChecked(True)
-
-        self.lineEdit_model_type.setText(self.import_config_data('model_type'))
-        if self.import_config_data('model_type').lower() == 'static':
-            self.lineEdit_min_shape.setText(list2str(self.import_config_data('input_min_shape')))
-            self.lineEdit_max_shape.setText(list2str(self.import_config_data('input_min_shape')))
-        else:
-            self.lineEdit_min_shape.setText(list2str(self.import_config_data('input_min_shape')))
-            self.lineEdit_max_shape.setText(list2str(self.import_config_data('input_max_shape')))
-
-        logger.info(f'Select Model Config: {self.import_config_path}')
+    # @pyqtSlot()
+    # def on_pushButton_input_config_clicked(self) -> None:
+    #     self.import_config_path, _ = QFileDialog.getOpenFileName(self, "选择文件", "/", 'json(*.json)')
+    #     if self.import_config_path == '':
+    #         return
+    #
+    #     self.import_config_data = JsonFile(self.import_config_path)
+    #
+    #     # self.lineEdit_input_config.setText(self.import_config_path)
+    #     self.horizontalSlider_workspace.setValue(self.import_config_data('workspace'))
+    #     self.label_workspace_number.setText(str(self.import_config_data('workspace')))
+    #
+    #     if self.import_config_data('fp32'):
+    #         self.radioButton_fp32.setChecked(True)
+    #         self.radioButton_fp16.setChecked(False)
+    #     else:
+    #         self.radioButton_fp32.setChecked(False)
+    #         self.radioButton_fp16.setChecked(True)
+    #
+    #     self.lineEdit_model_type.setText(self.import_config_data('model_type'))
+    #     if self.import_config_data('model_type').lower() == 'static':
+    #         self.lineEdit_min_shape.setText(list2str(self.import_config_data('input_min_shape')))
+    #         self.lineEdit_max_shape.setText(list2str(self.import_config_data('input_min_shape')))
+    #     else:
+    #         self.lineEdit_min_shape.setText(list2str(self.import_config_data('input_min_shape')))
+    #         self.lineEdit_max_shape.setText(list2str(self.import_config_data('input_max_shape')))
+    #
+    #     logger.info(f'Select Model Config: {self.import_config_path}')
 
     @pyqtSlot()
     def on_pushButton_analysis_onnx_clicked(self):
@@ -299,88 +323,69 @@ class SlotONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.is_analysis = True
 
-    @pyqtSlot()
-    def on_pushButton_export_config_clicked(self) -> None:
-        if not self.is_analysis:
-            QMessageBox.warning(self, "Warning", "Please Use Auto Analysis Function.")
-            return
-
-        filepath, _ = QFileDialog.getSaveFileName(self, '文件保存', '/', 'json(*.json)')
-        if filepath == '':
-            return
-        self.export_config.add({
-            "workspace": self.curr_workspace,
-            "fp32": self.radioButton_fp32.isChecked(),
-            "fp16": self.radioButton_fp16.isChecked(),
-            "model_type": self.lineEdit_model_type.text(),
-            "input_min_shape": str2list(self.lineEdit_min_shape.text()),
-            "input_max_shape": str2list(self.lineEdit_max_shape.text()),
-            "export_time": get_time(),
-            "uuid": self.config('uuid')
-        })
-        self.export_config.save(filepath)
-        QMessageBox.information(self, 'Success', 'Export Model Config Success.')
+    # @pyqtSlot()
+    # def on_pushButton_export_config_clicked(self) -> None:
+    #     if not self.is_analysis:
+    #         QMessageBox.warning(self, "Warning", "Please Use Auto Analysis Function.")
+    #         return
+    #
+    #     filepath, _ = QFileDialog.getSaveFileName(self, '文件保存', '/', 'json(*.json)')
+    #     if filepath == '':
+    #         return
+    #     self.export_config.add({
+    #         "workspace": self.curr_workspace,
+    #         "fp32": self.radioButton_fp32.isChecked(),
+    #         "fp16": self.radioButton_fp16.isChecked(),
+    #         "model_type": self.lineEdit_model_type.text(),
+    #         "input_min_shape": str2list(self.lineEdit_min_shape.text()),
+    #         "input_max_shape": str2list(self.lineEdit_max_shape.text()),
+    #         "export_time": get_time(),
+    #         "uuid": self.config('uuid')
+    #     })
+    #     self.export_config.save(filepath)
+    #     QMessageBox.information(self, 'Success', 'Export Model Config Success.')
 
     @pyqtSlot()
     def on_pushButton_run_clicked(self):
+
         logger.info('Click Run Button.')
-        self.export_log.add({
-            "input_onnx_path": self.onnx_fp.path,
-            "output_engine_path": self.engine_fp.path,
-            "workspace": self.curr_workspace,
-            "fp32": self.radioButton_fp32.isChecked(),
-            "fp16": self.radioButton_fp16.isChecked(),
-            "model_type": self.lineEdit_model_type.text(),
-            "input_min_shape": str2list(self.lineEdit_min_shape.text()),
-            "input_max_shape": str2list(self.lineEdit_max_shape.text()),
-            "export_time": get_time(),
-            "uuid": self.config('uuid')
-        })
 
-        self.export_log.save(self.export_log_fp.path)
-        # ui_convert = SlotConvert()
-        # ui_convert.show()
+        # try:
+        #     import tensorrt
+        # except:
+        #     warning_info = 'Don`t fond the python tensorrt.'
+        #     logger.warning(warning_info)
+        #     QMessageBox.warning(self, 'Warning', warning_info)
+        #     return
 
-        # if self.radioButton_fp32.isChecked():
-        #     self.use_fp32 = True
-        #     self.use_fp16 = False
-        # if self.radioButton_fp16.isChecked():
-        #     self.use_fp32 = False
-        #     self.use_fp16 = True
-        #
-        # if not self.is_analysis:
-        #     QMessageBox.warning(self, "Warning", "Please Use Analysis Function.")
-        # else:
-        #
-        # ui_convert = SlotConvert()
-        # ui_convert.show()
-        #
-        # static_shape = None
-        # dynamic_min_shape = None
-        # dynamic_max_shape = None
-        #
-        # if self.decode_onnx.is_dynamic:
-        #     static_shape = self.str2list(self.lineEdit_min_shape)
-        # else:
-        #     dynamic_min_shape = self.str2list(self.lineEdit_min_shape)
-        #     dynamic_max_shape = self.str2list(self.lineEdit_max_shape)
-        #
-        # onnx2engine = ONNX2Engine(
-        #     self.onnx_model_path,
-        #     self.engine_model_path,
-        #     self.use_fp32,
-        #     self.use_fp16,
-        #     self.decode_onnx.is_dynamic,
-        #     static_shape,
-        #     self.decode_onnx.get_input(0).name,
-        #     dynamic_min_shape,
-        #     dynamic_max_shape,
-        #     self.curr_workspace
-        # )
-        # onnx2engine.init()
-        # flag = onnx2engine.run()
-        # if flag:
-        #     QMessageBox.information(self, "Success", "Completed Creating Engine")
+        export_args = {
+            "workspace_size": self.curr_workspace,
+        }
+        # export_args = {
+        #     "onnx_path": self.onnx_fp.path,
+        #     "output_path": self.engine_fp.path,
+        #     "fp32": self.radioButton_fp32.isChecked(),
+        #     "fp16": self.radioButton_fp16.isChecked(),
+        #     "is_dynamic:": self.decode_onnx.is_dynamic,
+        #     "static_shape:": str2list(self.lineEdit_min_shape.text()),
+        #     "input_name:": self.decode_onnx.inputs[0].name,
+        #     "dynamic_min_shape": str2list(self.lineEdit_min_shape.text()),
+        #     "dynamic_max_shape": str2list(self.lineEdit_max_shape.text()),
+        #     "workspace_size": self.curr_workspace,
+        # }
+
+        self.onnx2engine_thread.start()
+        self.onnx2engine_thread.args_signal.emit(export_args)
+
+        ui_convert = SlotConvert()
+        ui_convert.show()
+
+        # self.export_log.add(export_args)
+        # self.export_log.add({
+        #     "export_time": get_time(),
+        #     "uuid": self.config('uuid')
+        # })
+        # self.export_log.save(self.export_log_fp.path)
 
     @pyqtSlot()
     def on_action_gitee_triggered(self):

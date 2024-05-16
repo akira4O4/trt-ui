@@ -2,7 +2,6 @@ import os
 import json
 from typing import Optional
 from loguru import logger
-from utils.filepath import FilePath
 
 
 class JsonFile:

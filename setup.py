@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from utils.jsonfile import JsonFile
+from src.jsonfile import JsonFile
 
 
 def get_install_requires() -> list:
