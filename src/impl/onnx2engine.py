@@ -259,7 +259,6 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.is_analysis = True
 
-
     @pyqtSlot()
     def on_pushButton_run_clicked(self):
 
@@ -292,7 +291,9 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.export_thread.start()
         time.sleep(0.5)
         self.export_thread.args_signal.emit(export_args)
+        self.export_thread.finished.connect(self.convert_progressbar.on_pushButton_stop_clicked)
 
+        self.convert_progressbar.pushButton_stop.clicked.connect(self.export_thread.terminate)
         self.convert_progressbar.show()
 
         # self.export_log.add(export_args)

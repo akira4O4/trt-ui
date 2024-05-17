@@ -57,6 +57,9 @@ class FilePath:
     def suffix(self) -> str:
         return self._suffix
 
+    def __str__(self) -> str:
+        return self._path
+
     def __repr__(self):
         return (
             f'Path:{self._path}\n'
