@@ -1,15 +1,12 @@
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-from ui_design.py.ui_convert import Ui_Convert
+from views.py.ui_convert_progress_bar import Ui_Convert
 
 
-class SlotConvert(QMainWindow, Ui_Convert):
+class ConvertProgressBar(QMainWindow, Ui_Convert):
     def __init__(self) -> None:
         super().__init__()
         self.setupUi(self)
-        self.progressBar_convert.setRange(0, 100)
-        self.progressBar_convert.setMinimum(0)
-        self.progressBar_convert.setMaximum(100)
 
     @pyqtSlot()
     def on_pushButton_stop_clicked(self):

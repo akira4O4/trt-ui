@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import shutil
 import uuid
@@ -49,3 +50,11 @@ def list2str(data: list) -> str:
     if len(data) == 0:
         return ''
     return ','.join(map(str, data))
+def get_home_dir() -> str:
+    if sys.platform == 'win32':
+        home_dir = os.environ['USERPROFILE']
+    elif sys.platform == 'linux' or sys.platform == 'darwin':
+        home_dir = os.environ['HOME']
+    else:
+        raise NotImplemented(f'Error! Not this system. {sys.platform}')
+    return home_dir

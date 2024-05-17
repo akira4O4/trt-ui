@@ -7,7 +7,7 @@ import tensorrt as trt
 import common
 
 
-class ONNX2Engine:
+class TRTExport:
     def __init__(
             self,
             onnx_path: str,

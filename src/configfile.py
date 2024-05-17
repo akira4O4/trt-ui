@@ -1,10 +1,11 @@
 import os
+import yaml
 import json
 from typing import Optional
 from loguru import logger
 
 
-class JsonFile:
+class ConfigFile:
     def __init__(self, path: Optional[str] = None) -> None:
         self._path = path
         self._data = {}
@@ -28,17 +29,28 @@ class JsonFile:
         self._path = value
 
     def load(self):
-        base_name = os.path.basename(self.path)
-        _, ext = os.path.splitext(base_name)
-        if ext != '.json':
-            logger.error('Input file is not json. ')
+        base_name = os.path.basename(self._path)
+        _, suffix = os.path.splitext(base_name)
+        if suffix.lower() == '.yaml':
+            self._load_yaml()
+        elif suffix.lower() == '.json':
+            self._load_json()
+
+        else:
+            logger.error('Input file is not yaml or json. ')
             exit()
 
+    def _load_json(self) -> None:
         with open(self.path, 'r') as config_file:
             self.data = json.load(config_file)
         logger.info(f'Loading: {self.path}.')
 
-    def del_(self, key: str) -> bool:
+    def _load_yaml(self) -> None:
+        with open(self._path, encoding='utf-8') as f:
+            self.data = yaml.load(f, Loader=yaml.FullLoader)
+        logger.info(f'Loading: {self.path}.')
+
+    def remove(self, key: str) -> bool:
         if self.data.get(key) is None:
             logger.error(f'Key: {key}is not found.')
             return False
@@ -49,30 +61,25 @@ class JsonFile:
 
     def add(self, kv: dict, overwrite: Optional[bool] = True):
         for k, v in kv.items():
-            self._add(k, v, overwrite)
+            self._set(k, v, overwrite)
 
-    def _add(self, key: str, val, overwrite: Optional[bool] = True) -> bool:
+    def _set(self, key: str, val, overwrite: Optional[bool] = True):
 
         if self.data.get(key) is None or self.data.get(key) == "":
             self.data[key] = val
             logger.success(f'Set {key} : {val}')
-            return True
         else:
             if overwrite:
                 self.data[key] = val
                 logger.success(f'Set {key}:{val}')
-                return True
             else:
-                return False
+                logger.warning(f'overwrite:{overwrite},Can`t overwrite {key} data.')
 
-    def _get_val(self, key: str):
+    def _get(self, key: str):
         return self.data.get(key, None)
 
     def save(self, output: Optional[str] = None) -> None:
-        save_path = self.path
-
-        if output is not None:
-            save_path = output
+        save_path = output if output is not None else self.path
 
         with open(save_path, 'w') as f:
             f.write(json.dumps(self.data, indent=4, ensure_ascii=False))
@@ -83,4 +90,4 @@ class JsonFile:
         return self.data.keys()
 
     def __call__(self, key: str):
-        return self._get_val(key)
+        return self._get(key)

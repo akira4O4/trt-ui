@@ -16,7 +16,7 @@ class ONNXIO:  # noqa
         return f'Name: {self.name}\nType: {self.type}\nShape: {self.shape}'
 
 
-class DecodeONNX:
+class DeONNX:
     def __init__(self, onnx_path: Optional[str] = None):
         self._onnx_path = onnx_path
         self._output = None
