@@ -5,6 +5,13 @@ import shutil
 import uuid
 import time
 from loguru import logger
+from PyQt5.QtCore import QThread
+
+
+def quit_thread(name: str, thread: QThread) -> None:
+    thread.quit()
+    thread.wait()
+    logger.info(f'Quit {name} Thread.')
 
 
 def check_ext(file: str, exts: list) -> bool:
@@ -50,6 +57,8 @@ def list2str(data: list) -> str:
     if len(data) == 0:
         return ''
     return ','.join(map(str, data))
+
+
 def get_home_dir() -> str:
     if sys.platform == 'win32':
         home_dir = os.environ['USERPROFILE']

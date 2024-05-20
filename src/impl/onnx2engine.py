@@ -19,7 +19,7 @@ from views.py.ui_onnx2engine import Ui_ONNX2Engine
 
 
 class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
-    _global_export_args_signal = QtCore.pyqtSignal(dict)
+    global_export_args_signal = QtCore.pyqtSignal(dict)
 
     def __init__(self, config_path: str) -> None:
 
@@ -74,13 +74,12 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
     def init_thread(self) -> None:
 
-        self._global_export_args_signal.connect(self.export_work.run)
-
         self.export_work.moveToThread(self.export_work_thread)
         self.export_work.finished_signal.connect(self.recv_data)
 
-        self.export_work_thread.finished.connect(self.convert_progressbar.on_pushButton_stop_clicked)
-        logger.info('Thread Start.')
+        self.global_export_args_signal.connect(self.export_work.run)
+        self.convert_progressbar.stop_signal.connect(self.stop_export_thread)
+        self.export_work_thread.finished.connect(self.convert_progressbar.close)
 
     def disable_config_widgets(self) -> None:
 
@@ -268,32 +267,56 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.is_analysis = True
 
-    def recv_data(self, flag: bool)->None:
+    # TODO:close thread
+    def stop_export_thread(self) -> None:
+        logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
+        logger.info(self.export_work_thread.currentThread())
+        if self.export_work_thread.isRunning():
+            self.export_work_thread.requestInterruption()
+            self.export_work_thread.exit(0)
+            logger.info('Terminate Work Thread.')
+        else:
+            logger.info('Thread Is Stop.')
+        logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
+
+    def quit_export_thread(self) -> None:
+        logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
+        if self.export_work_thread.isRunning():
+            self.export_work_thread.quit()
+            self.export_work_thread.wait()
+            logger.info('Quit Work Thread.')
+        else:
+            logger.info('Thread Is Quit.')
+        logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
+
+    def recv_data(self, flag: bool) -> None:
         logger.info(f'Recv Data: {flag}.')
-        self.export_work_thread.quit()
-        self.export_work_thread.wait()
-        logger.info('Quit & Wait Work Thread.')
+        if flag:
+            self.quit_export_thread()
+
+    def check_tensorrt_dependency(self) -> bool:
+        try:
+            import tensorrt
+            return True
+        except:
+            warning_info = 'Don`t fond the python tensorrt.'
+            logger.warning(warning_info)
+            QMessageBox.warning(self, 'Warning', warning_info)
+            return False
 
     @pyqtSlot()
     def on_pushButton_run_clicked(self):
 
         logger.info('Click Run Button.')
+
         self.export_work_thread.start()
         logger.info('Start Export Engine Thread.')
 
-        # try:
-        #     import tensorrt
-        # except:
-        #     warning_info = 'Don`t fond the python tensorrt.'
-        #     logger.warning(warning_info)
-        #     QMessageBox.warning(self, 'Warning', warning_info)
-        #     return
-
-        export_args = {
-            "workspace_size": self.curr_workspace,
-        }
-        self._global_export_args_signal.emit(export_args)
+        export_args = {"workspace_size": self.curr_workspace}
+        self.global_export_args_signal.emit(export_args)
         logger.info(f'Emit signal: {export_args}.')
+        self.convert_progressbar.show()
+
         # export_args = {
         #     "onnx_path": self.onnx_path.path,
         #     "output_path": self.engine_path.path,
@@ -306,9 +329,6 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         #     "dynamic_max_shape": str2list(self.lineEdit_max_shape.text()),
         #     "workspace_size": self.curr_workspace,
         # }
-
-        self.convert_progressbar.show()
-
         # self.export_log.add(export_args)
         # self.export_log.add({
         #     "export_time": get_time(),
