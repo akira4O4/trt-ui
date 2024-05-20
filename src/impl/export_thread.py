@@ -1,28 +1,23 @@
 import time
 
 from loguru import logger
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5 import QtCore
+from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from src.impl.convert_progressbar import ConvertProgressBar
 
 
-class ExportThread(QThread):
-    args_signal = pyqtSignal(dict)
+class ExportEngineWork(QObject):
+    finished_signal = QtCore.pyqtSignal(bool)
 
     def __init__(self):
-        super(ExportThread, self).__init__()
-        self.args_signal.connect(self.recv_args)
-        # self.args_signal.connect(self.something)
+        super().__init__()
         self.args = {}
 
-    def run(self):
-        logger.info(f'Run RunThread')
-        print(self.args)
-
-    def recv_args(self, args: dict) -> None:
-        logger.info('Recv Args.')
-        self.args = args
-
-    def something(self):
-        for i in range(100):
-            time.sleep(0.1)
+    def run(self, args: dict):
+        logger.info(f'Export Args: {args}')
+        logger.info(f'Work Thread Running.')
+        for i in range(5):
+            time.sleep(0.5)
             print(i)
+        self.finished_signal.emit(True)
+        logger.info(f'Emit True Signal.')

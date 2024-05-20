@@ -2,45 +2,43 @@ import os
 import time
 
 from loguru import logger
-
+from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QDesktopServices, QColor, QPalette
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-
+from PyQt5.QtCore import QThread
 from src.deonnx import DeONNX
 from src.colors import Colors
 from src.filepath import FilePath
 from src.configfile import ConfigFile
 from src.utils import list2str, str2list
 from src.impl.convert_progressbar import ConvertProgressBar
-from .export_thread import ExportThread
+from .export_thread import ExportEngineWork
 from views.py.ui_onnx2engine import Ui_ONNX2Engine
 
 
 class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
+    _global_export_args_signal = QtCore.pyqtSignal(dict)
 
     def __init__(self, config_path: str) -> None:
 
         super().__init__()
         self.colors = Colors
         self.config = ConfigFile(config_path)
-        self.export_thread = ExportThread()
+
         self.convert_progressbar = ConvertProgressBar()
+
+        self.export_work = ExportEngineWork()
+        self.export_work_thread = QThread()
 
         # Input ONNX path
         self.onnx_path = FilePath()
         self.engine_path = FilePath()
-        self.export_log_path = FilePath()
-
-        self.export_log = ConfigFile()
+        self.log_path = FilePath()
 
         self.use_fp32 = True
         self.use_fp16 = False
-
-        self.static_shape = []
-        self.dynamic_min_shape = []
-        self.dynamic_max_shape = []
 
         self.is_analysis = False
         self.is_convert_complete = False
@@ -60,7 +58,7 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.label_workspace_number.setText(str(self.curr_workspace))
         self.horizontalSlider_workspace.setValue(self.curr_workspace)
 
-        self.deonnx = DeONNX()
+        self.deonnx = DeONNX()  # noqa
 
         # Widget connect slot function
         self.lineEdit_output.editingFinished.connect(self.lineEdit_output_editingFinished)
@@ -71,6 +69,18 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.lineEdit_max_shape.editingFinished.connect(self.lineEdit_min_shape_editingFinished)
         self.lineEdit_min_shape.editingFinished.connect(self.lineEdit_max_shape_editingFinished)
+
+        self.init_thread()
+
+    def init_thread(self) -> None:
+
+        self._global_export_args_signal.connect(self.export_work.run)
+
+        self.export_work.moveToThread(self.export_work_thread)
+        self.export_work.finished_signal.connect(self.recv_data)
+
+        self.export_work_thread.finished.connect(self.convert_progressbar.on_pushButton_stop_clicked)
+        logger.info('Thread Start.')
 
     def disable_config_widgets(self) -> None:
 
@@ -115,15 +125,15 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         )
         self.engine_path.decode()
 
-        self.export_log_path.path = os.path.join(
+        self.log_path.path = os.path.join(
             self.engine_path.dir,
             self.engine_path.basename.replace(self.engine_path.suffix, '.log.json')
         )
-        self.export_log_path.decode()
+        self.log_path.decode()
 
         logger.info(f'ONNX FilePath: \n{self.onnx_path}')
         logger.info(f'Engine FilePath: \n{self.engine_path}')
-        logger.info(f'Export Log FilePath: \n{self.export_log_path}')
+        logger.info(f'Export Log FilePath: \n{self.log_path}')
 
         # Config widgets
         self.lineEdit_onnx_input.setText(self.onnx_path.path)
@@ -162,21 +172,20 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         )
         self.engine_path.decode()
 
-        self.export_log_path.path = os.path.join(
+        self.log_path.path = os.path.join(
             self.engine_path.dir,
             self.engine_path.basename.replace(self.engine_path.suffix, '.log.json')
         )
-        self.export_log_path.decode()
+        self.log_path.decode()
 
         self.lineEdit_output.setText(self.engine_path.path)
 
         logger.info(f'Engine FilePath: \n{self.engine_path}')
-        logger.info(f'Export Log FilePath: \n{self.export_log_path}')
+        logger.info(f'Export Log FilePath: \n{self.log_path}')
 
     def lineEdit_output_editingFinished(self) -> None:
 
         if os.path.isdir(self.lineEdit_output.text()):
-
             self.engine_path.path = os.path.join(
                 self.lineEdit_output.text(),
                 self.engine_path.basename
@@ -187,14 +196,14 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.engine_path.decode()
 
-        self.export_log_path.path = os.path.join(
+        self.log_path.path = os.path.join(
             self.engine_path.dir,
             self.engine_path.basename.replace(self.engine_path.suffix, '.log.json')
         )
-        self.export_log_path.decode()
+        self.log_path.decode()
 
         logger.info(f'Engine FilePath: \n{self.engine_path}')
-        logger.info(f'Export Log FilePath: \n{self.export_log_path}')
+        logger.info(f'Export Log FilePath: \n{self.log_path}')
 
     @pyqtSlot()
     def on_pushButton_analysis_onnx_clicked(self):
@@ -259,10 +268,18 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.is_analysis = True
 
+    def recv_data(self, flag: bool)->None:
+        logger.info(f'Recv Data: {flag}.')
+        self.export_work_thread.quit()
+        self.export_work_thread.wait()
+        logger.info('Quit & Wait Work Thread.')
+
     @pyqtSlot()
     def on_pushButton_run_clicked(self):
 
         logger.info('Click Run Button.')
+        self.export_work_thread.start()
+        logger.info('Start Export Engine Thread.')
 
         # try:
         #     import tensorrt
@@ -275,6 +292,8 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         export_args = {
             "workspace_size": self.curr_workspace,
         }
+        self._global_export_args_signal.emit(export_args)
+        logger.info(f'Emit signal: {export_args}.')
         # export_args = {
         #     "onnx_path": self.onnx_path.path,
         #     "output_path": self.engine_path.path,
@@ -288,12 +307,6 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         #     "workspace_size": self.curr_workspace,
         # }
 
-        self.export_thread.start()
-        time.sleep(0.5)
-        self.export_thread.args_signal.emit(export_args)
-        self.export_thread.finished.connect(self.convert_progressbar.on_pushButton_stop_clicked)
-
-        self.convert_progressbar.pushButton_stop.clicked.connect(self.export_thread.terminate)
         self.convert_progressbar.show()
 
         # self.export_log.add(export_args)
@@ -301,7 +314,7 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         #     "export_time": get_time(),
         #     "uuid": self.config('uuid')
         # })
-        # self.export_log.save(self.export_log_path.path)
+        # self.export_log.save(self.log_path.path)
 
     @pyqtSlot()
     def on_action_gitee_triggered(self):
