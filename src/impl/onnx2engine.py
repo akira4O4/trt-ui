@@ -19,7 +19,7 @@ from views.py.ui_onnx2engine import Ui_ONNX2Engine
 
 
 class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
-    global_export_args_signal = QtCore.pyqtSignal(dict)
+    export_args_signal = QtCore.pyqtSignal(dict)
 
     def __init__(self, config_path: str) -> None:
 
@@ -30,7 +30,7 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         self.convert_progressbar = ConvertProgressBar()
 
         self.export_work = ExportEngineWork()
-        self.export_work_thread = QThread()
+        self.export_work_thread = QtCore.QThread()
 
         # Input ONNX path
         self.onnx_path = FilePath()
@@ -75,11 +75,20 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
     def init_thread(self) -> None:
 
         self.export_work.moveToThread(self.export_work_thread)
-        self.export_work.finished_signal.connect(self.recv_data)
+        self.export_work.finished_signal.connect(lambda: {
+            self.convert_progressbar.close(),
+            self.pushButton_run.setEnabled(True)
+        })
 
-        self.global_export_args_signal.connect(self.export_work.run)
-        self.convert_progressbar.stop_signal.connect(self.stop_export_thread)
-        self.export_work_thread.finished.connect(self.convert_progressbar.close)
+        self.export_args_signal.connect(self.export_work.run)
+
+        self.convert_progressbar.stop_signal.connect(lambda: {
+            self.stop_export_thread(),
+            self.pushButton_run.setEnabled(True)
+        })
+
+        self.export_work_thread.start()
+        logger.info('Start Export Engine Thread.')
 
     def disable_config_widgets(self) -> None:
 
@@ -267,32 +276,15 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
 
         self.is_analysis = True
 
-    # TODO:close thread
     def stop_export_thread(self) -> None:
         logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
-        logger.info(self.export_work_thread.currentThread())
         if self.export_work_thread.isRunning():
-            self.export_work_thread.requestInterruption()
-            self.export_work_thread.exit(0)
+            self.export_work_thread.terminate()
+            self.export_work_thread.wait()
             logger.info('Terminate Work Thread.')
         else:
-            logger.info('Thread Is Stop.')
+            logger.info('Thread Is Terminate.')
         logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
-
-    def quit_export_thread(self) -> None:
-        logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
-        if self.export_work_thread.isRunning():
-            self.export_work_thread.quit()
-            self.export_work_thread.wait()
-            logger.info('Quit Work Thread.')
-        else:
-            logger.info('Thread Is Quit.')
-        logger.info(f'Thread Status: {self.export_work_thread.isRunning()}')
-
-    def recv_data(self, flag: bool) -> None:
-        logger.info(f'Recv Data: {flag}.')
-        if flag:
-            self.quit_export_thread()
 
     def check_tensorrt_dependency(self) -> bool:
         try:
@@ -308,14 +300,11 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
     def on_pushButton_run_clicked(self):
 
         logger.info('Click Run Button.')
-
-        self.export_work_thread.start()
-        logger.info('Start Export Engine Thread.')
+        if self.export_work_thread.isRunning() is False:
+            self.export_work_thread.start()
+            logger.info('Start Export Work Thread.')
 
         export_args = {"workspace_size": self.curr_workspace}
-        self.global_export_args_signal.emit(export_args)
-        logger.info(f'Emit signal: {export_args}.')
-        self.convert_progressbar.show()
 
         # export_args = {
         #     "onnx_path": self.onnx_path.path,
@@ -329,6 +318,11 @@ class ONNX2Engine(QMainWindow, Ui_ONNX2Engine):
         #     "dynamic_max_shape": str2list(self.lineEdit_max_shape.text()),
         #     "workspace_size": self.curr_workspace,
         # }
+
+        self.export_args_signal.emit(export_args)
+        logger.info(f'Emit Export Args Signal: {export_args}.')
+        self.convert_progressbar.show()
+        self.pushButton_run.setEnabled(False)
         # self.export_log.add(export_args)
         # self.export_log.add({
         #     "export_time": get_time(),

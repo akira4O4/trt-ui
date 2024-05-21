@@ -14,7 +14,6 @@ class ConvertProgressBar(QMainWindow, Ui_Convert):
 
     @pyqtSlot()
     def on_pushButton_stop_clicked(self):
-        # logger.info('Close Progress Bar.')
-        logger.info('Emit Stop Signal.')
+        logger.info('ProgressBar Emit Stop Signal.')
         self.stop_signal.emit()
         self.close()
