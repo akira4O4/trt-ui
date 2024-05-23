@@ -35,7 +35,7 @@ def init_app_config() -> None:
             os.makedirs(_INSTALL_CONFIG_PATH_.dir)
             logger.info(f'Make Dir: {_INSTALL_CONFIG_PATH_.dir}')
 
-        _DEFAULT_CONFIG_.add({
+        _DEFAULT_CONFIG_.update({
             'install_time': get_time(),
             'uuid': get_uuid()
         })
@@ -43,7 +43,7 @@ def init_app_config() -> None:
     else:
         _INSTALL_CONFIG_.path = _INSTALL_CONFIG_PATH_.path
         _INSTALL_CONFIG_.load()
-        _DEFAULT_CONFIG_.add({
+        _DEFAULT_CONFIG_.update({
             'install_time': get_time(),
             'uuid': _INSTALL_CONFIG_('uuid')
         })

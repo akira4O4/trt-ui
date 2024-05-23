@@ -1,7 +1,7 @@
 from loguru import logger
 from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSlot, QObject
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QMainWindow
 from views.py.ui_convert_progress_bar import Ui_Convert
 
 

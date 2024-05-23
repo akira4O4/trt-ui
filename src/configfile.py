@@ -59,24 +59,11 @@ class ConfigFile:
             del self.data[key]
             return True
 
-    def add(self, kv: dict, overwrite: Optional[bool] = True):
-        for k, v in kv.items():
-            self._set(k, v, overwrite)
+    def items(self):
+        return self._data.items()
 
-    def _set(self, key: str, val, overwrite: Optional[bool] = True):
-
-        if self.data.get(key) is None or self.data.get(key) == "":
-            self.data[key] = val
-            logger.success(f'Set {key} : {val}')
-        else:
-            if overwrite:
-                self.data[key] = val
-                logger.success(f'Set {key}:{val}')
-            else:
-                logger.warning(f'overwrite:{overwrite},Can`t overwrite {key} data.')
-
-    def _get(self, key: str):
-        return self.data.get(key, None)
+    def update(self, data: dict) -> None:
+        self._data.update(data)
 
     def save(self, output: Optional[str] = None) -> None:
         save_path = output if output is not None else self.path
@@ -89,5 +76,11 @@ class ConfigFile:
     def keys(self):
         return self.data.keys()
 
+    def __str__(self) -> str:
+        data_str = '\n'
+        for k, v in self._data.items():
+            data_str += f"{k} : {v}\n"
+        return data_str
+
     def __call__(self, key: str):
-        return self._get(key)
+        return self.data.get(key, None)

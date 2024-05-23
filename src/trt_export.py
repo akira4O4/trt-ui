@@ -1,6 +1,5 @@
-import os
 import math
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional
 from loguru import logger
 
 import tensorrt as trt
@@ -99,5 +98,5 @@ class TRTExport:
             logger.success('Completed creating Engine')
             return True
 
-        except:
+        except Exception:
             return False

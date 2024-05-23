@@ -88,7 +88,7 @@ class DeONNX:
             )
             if item.shape[0] is None:
                 self._is_dynamic = True
-        logger.info(f'Decode Input')
+        logger.info('Decode Input')
 
     def _decode_output(self) -> None:
         outputs = self.onnx_session.get_outputs()
@@ -101,7 +101,7 @@ class DeONNX:
                     item.shape
                 )
             )
-        logger.info(f'Decode Output')
+        logger.info('Decode Output')
 
     def get_io_info(self) -> str:
         return self._get_inputs_info() + self._get_output_info()
@@ -121,11 +121,3 @@ class DeONNX:
                     f"\ttype:\t{item.type}\n" \
                     f"\tshape:\t{item.shape}\n\n"
         return info
-
-
-if __name__ == '__main__':
-    decode_onnx = DecodeONNX(r'/temp/20240421_201659_danyang_E_mt_bs1_cls4_seg6_static.onnx')
-    print(decode_onnx.inputs)
-    print(decode_onnx.outputs)
-    print(decode_onnx.get_io_info())
-    exit()

@@ -1,17 +1,9 @@
 import os
 import sys
 import json
-import shutil
 import uuid
 import time
 from loguru import logger
-from PyQt5.QtCore import QThread
-
-
-def quit_thread(name: str, thread: QThread) -> None:
-    thread.quit()
-    thread.wait()
-    logger.info(f'Quit {name} Thread.')
 
 
 def check_ext(file: str, exts: list) -> bool:
@@ -48,7 +40,7 @@ def str2list(data: str) -> list:
         _data = data.split(',')
         _data = [int(x) for x in _data]
         return _data
-    except:
+    except Exception:
         logger.error('Input Data Error.')
         return []
 
@@ -65,5 +57,5 @@ def get_home_dir() -> str:
     elif sys.platform == 'linux' or sys.platform == 'darwin':
         home_dir = os.environ['HOME']
     else:
-        raise NotImplemented(f'Error! Not this system. {sys.platform}')
+        raise NotImplementedError(f'Error! Not this system. {sys.platform}')
     return home_dir

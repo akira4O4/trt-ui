@@ -1,18 +1,16 @@
 import os
-import time
 
 from loguru import logger
 from PyQt5 import QtCore
 from PyQt5.QtCore import QUrl
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QDesktopServices, QColor, QPalette
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox
-from PyQt5.QtCore import QThread
 from src.deonnx import DeONNX
 from src.colors import Colors
 from src.filepath import FilePath
 from src.configfile import ConfigFile
-from src.utils import list2str, str2list
+from src.utils import list2str
 from src.impl.convert_progressbar import ConvertProgressBar
 from .export_thread import ExportEngineWork
 from views.py.ui_onnx2engine import Ui_ONNX2Engine
