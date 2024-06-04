@@ -4,12 +4,13 @@ import sys
 from loguru import logger
 from PyQt5 import QtWidgets
 
+from src import VERSION,HOME
 from src.filepath import FilePath
 from src.configfile import ConfigFile
 from src.impl.onnx2engine import ONNX2Engine
 from src.utils import get_uuid, get_time, get_home_dir
 
-_HOME_ = get_home_dir()
+# _HOME_ = get_home_dir()
 
 _DEFAULT_CONFIG_PATH_ = FilePath(r'configs/config.json')
 _DEFAULT_CONFIG_ = ConfigFile(_DEFAULT_CONFIG_PATH_.path)
@@ -26,7 +27,7 @@ def init_logger_config() -> None:
 
 def init_app_config() -> None:
     # install_path: ~/.config/trt-export/config.json
-    install_path = os.path.join(_HOME_, f".config/{_DEFAULT_CONFIG_('app_name')}/{_DEFAULT_CONFIG_PATH_.basename}")
+    install_path = os.path.join(HOME, f".config/{_DEFAULT_CONFIG_('app_name')}/{_DEFAULT_CONFIG_PATH_.basename}")
     _INSTALL_CONFIG_PATH_.path = install_path
     _INSTALL_CONFIG_PATH_.decode()
 
@@ -60,6 +61,7 @@ def app() -> None:
 
 
 if __name__ == '__main__':
+    logger.info(f'Version: {VERSION}')
     init_app_config()
     init_logger_config()
     app()
