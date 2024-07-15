@@ -1,3 +1,4 @@
 /.idea
 /temp/
 /temp.py
+*/__pychche__/
